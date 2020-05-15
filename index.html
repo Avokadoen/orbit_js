@@ -1,0 +1,65 @@
+<canvas id="myCanvas" width="200" height="200" style="border:1px solid #000000;">
+
+<script>
+const canvas = document.getElementById('myCanvas');
+if (!canvas) {
+	console.error('failed to get canvas!');
+}
+
+// fetch canvas width
+// NOTE: This is an anti-pattern with canvas
+const width = canvas.width;
+const height = canvas.width;
+const centerX = width/2;
+const centerY = height/2;
+
+// Context to draw with
+const ctx = canvas.getContext('2d');
+
+// To keep it simple we lock fps
+const fps = 30;
+// how many seconds it take to rotate 360 degrees
+const yearTime = 3;
+// delta time will be locked as fps is
+const dt = 1/fps;
+
+// precompute a full rotation in radians to speed things up
+const TwoRad = 2 * Math.PI;
+// distance between planet and sun
+const distance = 50;
+// elapsed time
+let t = 0;
+
+function draw() {
+    // overwrite last frame with black
+   	ctx.fillStyle = "#000000";
+    ctx.fillRect(0,0, width, height);
+    
+    // draw sun
+	  ctx.fillStyle = "#FFFF00";
+	  ctx.fillRect(centerX - 10, (centerY - 10), 20, 20);
+    
+    // count elpased time
+    // NOTE: this will cause precision errors as times pass
+    t += dt;
+    
+    // map elapsed time to be 1 second = 1 full rotation and divide with desired elapse time
+    let frameT = (t * TwoRad) / yearTime
+    
+    // precompute cos and sin for frameT
+    const cosT = distance * Math.cos(frameT);
+    const sinT = distance * Math.sin(frameT);
+    
+    // apply rotation matrix to planet position vector
+    const posX = ((cosT - sinT) + centerX) - 10;
+    const posY = ((sinT + cosT) + centerY) - 10;
+    
+    // draw planet
+	  ctx.fillStyle = "#45b6fe";
+    ctx.fillRect(posX, posY, 20, 20);
+};
+
+// force redraw x times each second
+// NOTE: this is a canvas anti-pattern
+const animate = window.setInterval(draw, fps);
+</script>
