@@ -1,0 +1,115 @@
+<canvas id="myCanvas" width="600" height="600" style="border:1px solid #000000;">
+
+<script>
+const canvas = document.getElementById('myCanvas');
+if (!canvas) {
+	console.error('failed to get canvas!');
+}
+
+// fetch canvas width
+// NOTE: This is an anti-pattern with canvas
+const width = canvas.width;
+const height = canvas.width;
+const centerX = width/2;
+const centerY = height/2;
+
+// Context to draw with
+const ctx = canvas.getContext('2d');
+
+// To keep it simple we lock fps
+const fps = 30;
+// how many seconds it take to rotate 360 degrees
+const yearTime = 3;
+// delta time will be locked as fps is
+const dt = 1/fps;
+
+// precompute a full rotation in radians to speed things up
+const TwoRad = 2 * Math.PI;
+
+// elapsed time
+let t = 0;
+
+const entities = [
+	{
+    	parentIndex: -1,
+        size: 20,
+    	distance: 50,
+        yearTime: 3,
+        posX: 0,
+        posY: 0,
+        color: "#45b6fe"
+    },
+	{
+    	parentIndex: -1,
+        size: 35,
+    	distance: 100,
+        yearTime: 5,
+    	posX: 0,
+        posY: 0,
+        color: "#de80ff"
+    },
+    {
+    	parentIndex: 1,
+        size: 5,
+    	distance: 45,
+        yearTime: 5,
+    	posX: 0,
+        posY: 0,
+        color: "#ff8962"
+    },
+	{
+    	parentIndex: -1,
+        size: 10,
+    	distance: 200,
+        yearTime: 8,
+    	posX: 0,
+        posY: 0,
+        color: "#d7fa62"
+    }
+];
+
+function draw() {
+    // overwrite last frame with black
+   	ctx.fillStyle = "#000000";
+    ctx.fillRect(0,0, width, height);
+    
+    // draw sun
+	ctx.fillStyle = "#FFFF00";
+	ctx.fillRect(centerX - 10, (centerY - 10), 20, 20);
+    
+    // count elpased time
+    // NOTE: this will cause precision errors as times pass
+    t += dt;
+    
+    entities.forEach(function(entity) {
+        // map elapsed time to be 1 second = 1 full rotation and divide with desired elapse time
+    	let frameT = (t * TwoRad) / entity.yearTime
+    
+    	// precompute cos and sin for frameT
+    	const cosT = entity.distance * Math.cos(frameT);
+    	const sinT = entity.distance * Math.sin(frameT);
+
+    	// apply rotation matrix to planet position vector
+        // TODO: refactor if
+        const parentX = (entity.parentIndex >= 0 && entity.parentIndex < entities.length) 
+        ? entities[entity.parentIndex].posX + entities[entity.parentIndex].size / 2 
+        : centerX;
+        
+        const parentY = (entity.parentIndex >= 0 && entity.parentIndex < entities.length) 
+        ? entities[entity.parentIndex].posY + entities[entity.parentIndex].size / 2 
+        : centerY;
+        const entityRad = entity.size / 2;
+    	entity.posX = ((cosT - sinT) + parentX) - entityRad;
+    	entity.posY = ((sinT + cosT) + parentY) - entityRad;
+
+    	// draw planet
+    	ctx.fillStyle = entity.color;
+    	ctx.fillRect(entity.posX, entity.posY, entity.size, entity.size);
+    });
+    
+};
+
+// force redraw x times each second
+// NOTE: this is a canvas anti-pattern
+const animate = window.setInterval(draw, fps);
+</script>
