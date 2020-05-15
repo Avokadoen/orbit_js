@@ -5,7 +5,9 @@ you can test it online [here](https://js.do/code/439943)
 
 # Gif! 👀
 Basics (index.html)
+
 ![](orbit.gif)
 
 Applied basics (adv_index.html)
+
 ![](solar_system.gif)
